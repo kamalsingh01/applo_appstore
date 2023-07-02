@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from mod_apps.models import App, Category, SubCategory
+from mod_apps.models import App, Category, SubCategory, Download
 from django.db import IntegrityError
 from accounts.models import UserModel
 
@@ -66,7 +66,6 @@ class GetAppSerializer(serializers.ModelSerializer):
 
 # Category Related
 class GetCategorySerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Category
         fields = '__all__'
@@ -115,3 +114,13 @@ class AddSubCategorySerializer(serializers.Serializer):
             return subcategory
         except IntegrityError:
             raise serializers.ValidationError({"error": "Sub-Category Already Exists"})
+
+
+# Download
+
+class DownloadListSerializer(serializers.ModelSerializer):
+    app = NewAppResponseSerializer()
+
+    class Meta:
+        model = Download
+        fields = ['id', 'app','status', 'screenshot', 'user_id']

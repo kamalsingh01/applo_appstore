@@ -54,3 +54,8 @@ class Download(models.Model):
     user = models.ForeignKey(UserModel, on_delete=models.CASCADE)
     status = models.BooleanField(default=False)
     screenshot = models.ImageField(upload_to="mod_apps/files/screenshot", blank=True, default=None)
+
+    objects = models.manager
+
+    class Meta:
+        unique_together = ("app", "user")

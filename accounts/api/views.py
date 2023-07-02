@@ -5,7 +5,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from rest_framework.generics import GenericAPIView
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import AdminLoginSerializer, UserRegisterSerializer, UserLoginSerializer
+from .serializers import AdminLoginSerializer, UserRegisterSerializer, UserLoginSerializer, UserProfileSerializer, UpdateProfileSerializer
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from accounts.models import UserModel
@@ -18,8 +18,6 @@ from accounts.models import UserModel
 class AdminLoginView(GenericAPIView):
     permission_classes = [AllowAny]
     serializer_class = AdminLoginSerializer
-
-
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -34,6 +32,7 @@ class AdminLoginView(GenericAPIView):
 
 
 class AdminLogoutView(GenericAPIView):
+    serializer_class = UserLoginSerializer
     def post(self, request):
         try:
             refresh_token = request.data["refresh"]
@@ -57,7 +56,7 @@ class UserRegisterView(GenericAPIView):
         return Response(
             {
                 "msg": "User Created, Perform login",
-                #**serializer.validated_data
+                # **serializer.validated_data
             }, status=status.HTTP_201_CREATED
         )
 
@@ -77,7 +76,7 @@ class UserLoginView(GenericAPIView):
 
 
 class UserLogoutView(GenericAPIView):
-    # authentication_classes = [JWTAuthentication]
+    serializer_class = UserLoginSerializer
 
     def post(self, request):
         try:
@@ -90,10 +89,21 @@ class UserLogoutView(GenericAPIView):
                 {"msg": "Invalid refresh token"}, status=status.HTTP_400_BAD_REQUEST
             )
 
-@api_view(["GET"])
-@permission_classes([IsAuthenticated])
-def UserProfileView(request):
-    user_id = request.user.id
-    user_details = UserModel.objects.get(id = user_id)
-    serializer = UserRegisterSerializer(user_details)
-    return Response(serializer.data)
+
+class UserProfileView(GenericAPIView):
+    serializer_class = UserProfileSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        user_id = request.user.id
+        user = UserModel.objects.get(id=user_id)
+        serializer = self.get_serializer(user)
+        return Response(serializer.data)
+
+    def patch(self, request, *args, **kwargs):
+        user_id = request.user.id
+        serializer = UpdateProfileSerializer(data=request.data, partial=True, context={'user_id': user_id})
+        serializer.is_valid(raise_exception=True)
+        return Response(serializer.data)
+
+

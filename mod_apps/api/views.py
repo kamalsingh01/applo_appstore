@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from rest_framework.exceptions import ValidationError
+from django.db import IntegrityError
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from mod_apps.models import App, Category, SubCategory, Download
@@ -9,8 +10,9 @@ from rest_framework import status
 from .serializers import (NewAppSerializer, GetAppSerializer,
                           AddCategorySerializer, GetCategorySerializer,
                           GetSubCategorySerializer, AddSubCategorySerializer,
-
-                          )
+                          NewAppResponseSerializer, DownloadListSerializer)
+from accounts.models import UserModel
+from accounts.api.serializers import UpdateProfileSerializer
 from rest_framework.decorators import api_view, permission_classes
 from .permissions import IsAdminAndCreator
 from rest_framework.parsers import FormParser, MultiPartParser
@@ -25,7 +27,7 @@ def GetCategoryView(request):
 
 
 class AddCategoryView(GenericAPIView):
-    #permission_classes = [IsAdminUser, IsAuthenticated]
+    # permission_classes = [IsAdminUser, IsAuthenticated]
     serializer_class = AddCategorySerializer
 
     def post(self, request, *args, **kwargs):
@@ -54,8 +56,9 @@ class GetSubCategoryView(GenericAPIView):
             status=status.HTTP_200_OK
         )
 
+
 class AddSubCategoryView(GenericAPIView):
-    #permission_classes = [IsAdminUser, IsAuthenticated]
+    # permission_classes = [IsAdminUser, IsAuthenticated]
     serializer_class = AddSubCategorySerializer
 
     def post(self, request, *args, **kwargs):
@@ -71,7 +74,7 @@ class AddSubCategoryView(GenericAPIView):
 @api_view(["GET"])
 def AppListView(request):
     app_list = App.objects.all()
-    serializer = NewAppSerializer(app_list, many=True)
+    serializer = NewAppResponseSerializer(app_list, many=True)
     return Response(serializer.data)
 
 
@@ -98,7 +101,7 @@ class AddAppView(GenericAPIView):
         return Response(
             {
                 "msg": "New App created",
-                #**serializer.data
+                # **serializer.data
             }
         )
 
@@ -134,13 +137,47 @@ class AdminAppView(GenericAPIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class UserAppListView(GenericAPIView):
-    pass
-
-
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def UserAppView(request, pk):
     app_detail = App.objects.get(id=pk)
-    serializer = NewAppSerializer(app_detail)
+    serializer = NewAppResponseSerializer(app_detail)
     return Response(serializer.data)
+
+
+class DownloadView(GenericAPIView):
+    permission_classes = [IsAuthenticated]
+
+    serializer_class = UpdateProfileSerializer
+
+    def post(self, request, pk, *args, **kwargs):
+        user_id = request.user.id
+        try:
+            download = Download(
+                app_id=pk,
+                user_id=user_id
+            )
+            user = UserModel.objects.get(id=user_id)
+            app = App.objects.get(id=pk)
+            serializer = UpdateProfileSerializer(data=request.data, partial=True,
+                                                 context={'user_id': user_id, "app_id": pk})
+            download.save()
+            serializer.update(user, app)
+            return Response({"msg": "App Downloaded"})
+        except IntegrityError:
+            raise ValidationError({"error": "App already downloaded by the user"})
+
+class DownloadListView(GenericAPIView):
+    serializer_class = DownloadListSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        user_id = request.user.id
+        downloads = Download.objects.filter(user_id = user_id)
+        serializer = self.get_serializer(downloads, many = True)
+        return Response(serializer.data)
+
+# class UserPointsView(GenericAPIView):
+#
+#     def get(self, request, *args, **kwargs):
+#         user_id = request.user.id

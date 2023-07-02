@@ -1,7 +1,7 @@
 from django.urls import path, include
 from .views import (AddAppView, AppListView , AdminAppListView, AdminAppView,
-                    UserAppListView,UserAppView,GetSubCategoryView, GetCategoryView,
-                    AddCategoryView, AddSubCategoryView
+                    UserAppView,GetSubCategoryView, GetCategoryView,
+                    AddCategoryView, AddSubCategoryView, DownloadView, DownloadListView
                     )
 
 urlpatterns = [
@@ -9,7 +9,7 @@ urlpatterns = [
     path('admin/details/<int:pk>/', AdminAppView().as_view(), name='admin_app-detail'),
     path('home/', AppListView, name = 'app-list'),
     path('admin/',AdminAppListView().as_view(), name="admin-apps"),
-    path('user/app_detail/<int:pk>/', UserAppView, name = 'user_app_detail'),
+    path('user/detail/<int:pk>/', UserAppView, name = 'user_app_detail'),
     #path('user/',UserAppListView().as_view(), name="user-apps")
 
     #category
@@ -18,5 +18,9 @@ urlpatterns = [
     #subcategory
     path('subcategory/list/', GetSubCategoryView.as_view(), name = 'subcategory_list'),
     path('subcategory/add/', AddSubCategoryView.as_view(), name = 'add_category'),
+
+    #download
+    path('user/download/<int:pk>/', DownloadView.as_view(), name = 'app_download'),
+    path('user/download/list/', DownloadListView.as_view(), name = 'download_list')
 
 ]
