@@ -23,7 +23,6 @@ class NewAppSerializer(serializers.Serializer):
         user_id = self.context.get('user_id')
         category_id = attrs.get('category')
         subcategory_id = attrs.get('subcategory')
-        x = type(attrs['category'])
         try:
             app = App(name=attrs['name'],
                       link=attrs['link'],
@@ -123,4 +122,26 @@ class DownloadListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Download
-        fields = ['id', 'app','status', 'screenshot', 'user_id']
+        fields = ['id', 'app', 'status', 'screenshot', 'user_id']
+
+
+class TaskListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Download
+        fields = ['id', 'status', 'screenshot', 'app_id', 'user_id']
+
+
+class TaskSerializer(serializers.Serializer):
+    screenshot = serializers.ImageField()
+
+    def validate(self, attrs):
+        user_id = self.context.get('user_id')
+        download_id = self.context.get('down_id')
+        download = Download.objects.get(id=download_id)
+        if download.user_id == user_id:
+            download.screenshot = attrs.get('screenshot', download.screenshot)
+            download.status = True
+            download.save()
+        else:
+            raise serializers.ValidationError({"msg": "Not allowed to complete task"})
+        return download

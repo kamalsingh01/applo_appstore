@@ -10,7 +10,7 @@ from rest_framework import status
 from .serializers import (NewAppSerializer, GetAppSerializer,
                           AddCategorySerializer, GetCategorySerializer,
                           GetSubCategorySerializer, AddSubCategorySerializer,
-                          NewAppResponseSerializer, DownloadListSerializer)
+                          NewAppResponseSerializer, DownloadListSerializer, TaskSerializer, TaskListSerializer)
 from accounts.models import UserModel
 from accounts.api.serializers import UpdateProfileSerializer
 from rest_framework.decorators import api_view, permission_classes
@@ -79,7 +79,7 @@ def AppListView(request):
 
 
 class AdminAppListView(GenericAPIView):
-    serializer_class = NewAppSerializer
+    serializer_class = NewAppResponseSerializer
     permission_classes = [IsAdminUser]
 
     def get(self, request, *args, **kwargs):
@@ -101,7 +101,7 @@ class AddAppView(GenericAPIView):
         return Response(
             {
                 "msg": "New App created",
-                # **serializer.data
+                # **serializer.validated_data
             }
         )
 
@@ -167,17 +167,43 @@ class DownloadView(GenericAPIView):
         except IntegrityError:
             raise ValidationError({"error": "App already downloaded by the user"})
 
+
 class DownloadListView(GenericAPIView):
     serializer_class = DownloadListSerializer
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
         user_id = request.user.id
-        downloads = Download.objects.filter(user_id = user_id)
-        serializer = self.get_serializer(downloads, many = True)
+        downloads = Download.objects.filter(user_id=user_id)
+        serializer = self.get_serializer(downloads, many=True)
         return Response(serializer.data)
 
-# class UserPointsView(GenericAPIView):
-#
-#     def get(self, request, *args, **kwargs):
-#         user_id = request.user.id
+
+class TaskListView(GenericAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        user_id = request.user.id
+        tasks = Download.objects.filter(user_id=user_id)
+        serializer = TaskListSerializer(tasks, many = True)
+        return Response(serializer.data)
+
+
+class TaskView(GenericAPIView):
+    serializer_class = TaskSerializer
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+
+    def get(self, request, pk, *args, **kwargs):
+        user_id = request.user.id
+        task = Download.objects.get(user_id=user_id, id=pk)
+        serializer = TaskListSerializer(task)
+        return Response(serializer.data)
+
+    def patch(self, request, pk, *args, **kwargs):
+        user_id = request.user.id
+        serializer = self.get_serializer(data=request.data, partial=True, context={'user_id': user_id, 'down_id': pk})
+        serializer.is_valid(raise_exception=True)
+        return Response({
+            "msg": "Task Completed"
+        })

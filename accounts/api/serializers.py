@@ -11,8 +11,7 @@ from django.core.exceptions import ObjectDoesNotExist
 # from django.contrib.auth.hashers import check_password
 
 
-# ADMIN RELATED
-class AdminLoginSerializer(serializers.Serializer):
+class LoginSerializer(serializers.Serializer):
     username = serializers.CharField(required=True)
     password = serializers.CharField(
         style={
@@ -28,13 +27,9 @@ class AdminLoginSerializer(serializers.Serializer):
         except UserModel.DoesNotExist:
             raise serializers.ValidationError({" error ": " User doesn't Exist "})
         if user:
-            # check_user = authenticate(username = attrs['username'], password = attrs['password'])
-            if user.is_superuser and user.is_staff:
-                attrs['data_type'] = 'admin'
-            else:
-                raise serializers.ValidationError({" error ": " Not an Admin Account "})
             if user.check_password(attrs['password']):
                 refresh = RefreshToken.for_user(user)
+                # creating token manually using JWT and returning once user successfully registers
                 return {
                     "token": {
                         "refresh": str(refresh),
@@ -84,25 +79,6 @@ class UserLoginSerializer(serializers.Serializer):
         },
         write_only=True
     )
-
-    def validate(self, attrs):
-        try:
-            user = UserModel.objects.get(username=attrs['username'])
-        except UserModel.DoesNotExist:
-            raise serializers.ValidationError({"error": "User doesn't Exist"})
-        if user:
-            print(attrs['password'])
-            if user.check_password(attrs['password']):
-                refresh = RefreshToken.for_user(user)
-                # creating token manually using JWT and returning once user successfully registers
-                return {
-                    "token": {
-                        "refresh": str(refresh),
-                        "access": str(refresh.access_token)
-                    }
-                }
-            else:
-                raise serializers.ValidationError({"error": "Invalid Password"})
 
 
 class UserProfileSerializer(serializers.ModelSerializer):

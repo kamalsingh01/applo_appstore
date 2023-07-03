@@ -101,8 +101,36 @@ python3 manage.py runserver
 
 ### Usage
 
+#### Endpoints
 
 - The resources/Endpoints provided in this project are as follows: 
+```
+- /account/login/ - POST : for user/admin login, with username and password to get access token
+- /account/user/register/ - POST : to create user
+- /account/user/profile/ - GET : PATCH - to see user profile and to make changes.
+- /account/logout/ - POST : for user/login, with refresh token
+
+- /app/home/ - GET : shows all the apps on appstore, allows anyone
+- /app/new/ - POST : allows only admin to add new app
+- /app/admin/ - GET : allows any admin to list all the apps it added
+- /app/admin/<int:pk>/ - GET,PATCH,DELETE : allows admin to see,update and delete any app it added.
+- /app/category/add - POST : allows admin to add a unique category
+- /app/category/list - GET : allows admin to get all unique category
+- /app/subcategory/add/ - POST : allows admin to add a unique sub-category under any category
+- /app/subcategory/list/ - GET : allows admin to get all unique sub-category under any category
+- /app/user/<int:pk> - GET : allows user to see app details
+- /app/user/download/<int:pk> - POST : allows user to download an app
+- /app/user/download/list - GET : allows user to list the downloaded apps
+- /app/user/task/list/ - GET : shows all the task for any specific user
+- /app/user/task/<int:pk>/ - GET, PATCH : gives detail of any task and allows any user to add the screenshot and complete the task
+
+- /swagger/ - to check for swagger documented APIs
+
+```
+
+- `/account/login/`, `/account/user/register/`, `/app/home/` do not require any authentication or authorisation, but all other endpoints requires authentication.
+- Once we create a user, we can send a `POST` request to `/account/login/` to get `access` and `refresh` token for both admin and user.
+- Now we can use this `access` token as `Bearer ${access}` as `Authorization` header in our request.
 
 
 
