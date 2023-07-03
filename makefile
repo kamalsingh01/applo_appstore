@@ -1,13 +1,13 @@
 setup:
-	python3 -m venv virtual
-	source virtual/bin/activate
+	python3 -m venv venv
+	source venv/bin/activate
 	pip3 install -r requirements.txt --ignore-installed
 
 makemigrations:
-	./virtual/bin/python manage.py makemigrations
+	./venv/bin/python manage.py makemigrations
 
 migrate:
-	./virtual/bin/python manage.py migrate
+	./venv/bin/python manage.py migrate
 
 run:
-	./virtual/bin/python manage.py runserver
+	./venv/bin/python manage.py runserver

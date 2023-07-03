@@ -36,14 +36,14 @@ permissions classes of rest_framework are used to authorize the request.
 To run this project on a machine, we need `Python` and `Postgres` database as basic requirements.
 
 #### Install Steps
-- First and foremost, start by creating a virtual environment the current directory. I have used `virtual` as the name 
+- First and foremost, start by creating a virtual environment the current directory. I have used `venv` as the name 
   of the virtual environment.
 ```python
-python -m venv virtual
+python -m venv venv
 ```
 - Once done with the installation, navigate to the virtual environment and activate it(below is for linux).
 ```shell
-source virtual/bin/activate
+source venv/bin/activate
 ```
 - Now install all the dependencies using pip and `requirement.txt` file.
 ```python
@@ -93,7 +93,7 @@ python3 manage.py migrate
 python3 manage.py runserver
 ```
 
-- You can create a superuser/admin user and provide all the details required afterwards
+- You can create a superuser/admin user and provide all the details required afterwards. This superuser will server as an admin to add and manage android apps.
 ```shell
 ./manage.py createsuperuser 
 ```
@@ -131,12 +131,13 @@ python3 manage.py runserver
 - `/account/login/`, `/account/user/register/`, `/app/home/` do not require any authentication or authorisation, but all other endpoints requires authentication.
 - Once we create a user, we can send a `POST` request to `/account/login/` to get `access` and `refresh` token for both admin and user.
 - Now we can use this `access` token as `Bearer ${access}` as `Authorization` header in our request.
+- Points earned by any user gets updated on `user_table` everytime user downloads any app adn can be retrieved easily
 
+#### User-Interface
 
+- for the UI part, 'login' and 'register' is only built based on 'React.js' . It takes username and password to login and for register it takes all the basic details required.
 
-
-
-
+- login template was cloned from `https://github.com/Aatmjeet/React-JWT_login-template`
 
 
 
