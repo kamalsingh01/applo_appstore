@@ -89,7 +89,9 @@ class GetSubCategorySerializer(serializers.Serializer):
     category_id = serializers.IntegerField(required=True)
 
     def validate(self, attrs):
-        queryset = SubCategory.objects.filter(category_id=attrs['category_id'])
+        category_id = attrs['category_id']
+        queryset = SubCategory.objects.filter(category_id=category_id)
+        print(queryset)
         if len(queryset) != 0:
             sub_category_list = [
                 {'id': sc.id, 'name': sc.name} for sc in queryset

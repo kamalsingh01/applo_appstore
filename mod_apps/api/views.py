@@ -27,7 +27,7 @@ def GetCategoryView(request):
 
 
 class AddCategoryView(GenericAPIView):
-    # permission_classes = [IsAdminUser, IsAuthenticated]
+    permission_classes = [IsAdminUser]
     serializer_class = AddCategorySerializer
 
     def post(self, request, *args, **kwargs):
@@ -58,7 +58,7 @@ class GetSubCategoryView(GenericAPIView):
 
 
 class AddSubCategoryView(GenericAPIView):
-    # permission_classes = [IsAdminUser, IsAuthenticated]
+    permission_classes = [IsAdminUser]
     serializer_class = AddSubCategorySerializer
 
     def post(self, request, *args, **kwargs):

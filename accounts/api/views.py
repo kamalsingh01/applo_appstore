@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from rest_framework.generics import GenericAPIView
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import RefreshToken, BlacklistedToken
 from .serializers import  UserRegisterSerializer, UserProfileSerializer, UpdateProfileSerializer, LoginSerializer
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
